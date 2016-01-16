@@ -1,7 +1,9 @@
 package com.andrewgura.controllers {
 import com.andrewgura.nfs12NativeFileFormats.NFSNativeResourceLoader;
+import com.andrewgura.nfs12NativeFileFormats.models.ModelDescriptionVO;
 import com.andrewgura.ui.popup.AppPopups;
 import com.andrewgura.ui.popup.PopupFactory;
+import com.andrewgura.utils.ModelLoader;
 import com.andrewgura.vo.ModelVO;
 import com.andrewgura.vo.QGHProjectVO;
 
@@ -34,18 +36,18 @@ public class QGHController {
             switch (file.extension.toLowerCase()) {
                 case 'cfm':
                     try {
-                        var nfsTextures:ArrayCollection = NFSNativeResourceLoader.loadNativeFile(file);
+                        var nfsModels:ArrayCollection = NFSNativeResourceLoader.loadNativeFile(file);
                     } catch (e:Error) {
                         PopupFactory.instance.showPopup(AppPopups.ERROR_POPUP, file.name + ": " + e.message);
                         continue;
                     }
                         //TODO convert model to away3d model
-//                    for each (var nfsTexture:INativ in nfsTextures) {
-//                        model = new TextureVO(nfsTexture.name);
-//                        addTexture(model);
-//                        textureWrap = new TextureLoader(model);
-//                        textureWrap.loadByBitmap(new Bitmap(BitmapData(nfsTexture)));
-//                    }
+                    for each (var nfsModel:ModelDescriptionVO in nfsModels) {
+                        model = new ModelVO(nfsModel.name);
+                        addModel(model);
+                        var loader:ModelLoader = new ModelLoader(model);
+                        loader.loadByDescription(nfsModel);
+                    }
                     break;
             }
         }

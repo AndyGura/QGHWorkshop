@@ -31,7 +31,7 @@
         private function onAddedToStage(event:Event):void {
             this.addEventListener(NativeDragEvent.NATIVE_DRAG_ENTER, dragEnterHandler);
             this.addEventListener(NativeDragEvent.NATIVE_DRAG_DROP, dragDropHandler);
-            addEventListener("renameTexture", onRenameModel);
+            addEventListener("renameModel", onRenameModel);
         }
 
         protected function addItemClickHandler(event:MouseEvent):void {

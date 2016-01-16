@@ -14,6 +14,9 @@
             <entry module-name="WorkshopAPI" build-configuration-name="WorkshopAPI">
               <dependency linkage="Merged" />
             </entry>
+            <entry library-id="f7d78133-4bde-40ac-bd62-48d1aba2d9e5">
+              <dependency linkage="Merged" />
+            </entry>
           </entries>
           <sdk name="4.14.1.air-20.0" />
         </dependencies>
@@ -39,5 +42,15 @@
     <orderEntry type="module" module-name="BreezeTheme" exported="" />
     <orderEntry type="module" module-name="NFSNativeResourceLoader" exported="" />
     <orderEntry type="module" module-name="WorkshopAPI" exported="" />
+    <orderEntry type="module-library" exported="">
+      <library type="flex">
+        <properties id="f7d78133-4bde-40ac-bd62-48d1aba2d9e5" />
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/away3d-core-fp11_4_1_6.swc!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

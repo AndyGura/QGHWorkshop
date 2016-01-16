@@ -1,5 +1,7 @@
 package com.andrewgura.vo {
 
+import com.andrewgura.controllers.QGHController;
+
 import flash.utils.ByteArray;
 
 import mx.collections.ArrayCollection;
@@ -33,6 +35,7 @@ public class QGHProjectVO extends ProjectVO {
     }
 
     override public function importFiles(files:Array):void {
+        (new QGHController(this)).importFiles(files);
     }
 
 

@@ -2,40 +2,45 @@
 <s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009"
                 xmlns:s="library://ns.adobe.com/flex/spark"
                 autoDrawBackground="true"
-                width="100%" height="50">
-    <!--doubleClick="onDoubleClick(event)" doubleClickEnabled="true">-->
+                width="100%" height="50"
+                doubleClick="onDoubleClick(event)" doubleClickEnabled="true">
     <fx:Script>
 		<![CDATA[
+        import com.andrewgura.events.DataObjectEvent;
+        import com.andrewgura.vo.ModelVO;
+
+        import mx.events.FlexEvent;
+
         [Bindable]
         public var isInEditMode:Boolean = false;
-        //
-        //        private function onDoubleClick(event:MouseEvent):void {
-        //            isInEditMode = true;
-        //            editNameTextInput.addEventListener(FocusEvent.FOCUS_OUT, onEditNameFocusOut);
-        //            editNameTextInput.setFocus();
-        //        }
-        //
-        //        private function onEditNameFocusOut(event:FocusEvent):void {
-        //            isInEditMode = false;
-        //        }
-        //
-        //        private function onEditImageEnter(event:FlexEvent):void {
-        //            if (!isInEditMode) {
-        //                return;
-        //            }
-        //            dispatchEvent(new DataObjectEvent("renameTexture", {texture: data, newName: editNameTextInput.text}, true));
-        //            isInEditMode = false;
-        //            this.setFocus();
-        //        }
+
+        private function onDoubleClick(event:MouseEvent):void {
+            isInEditMode = true;
+            editNameTextInput.addEventListener(FocusEvent.FOCUS_OUT, onEditNameFocusOut);
+            editNameTextInput.setFocus();
+        }
+
+        private function onEditNameFocusOut(event:FocusEvent):void {
+            isInEditMode = false;
+        }
+
+        private function onEditImageEnter(event:FlexEvent):void {
+            if (!isInEditMode) {
+                return;
+            }
+            dispatchEvent(new DataObjectEvent("renameModel", {model: data, newName: editNameTextInput.text}, true));
+            isInEditMode = false;
+            this.setFocus();
+        }
         ]]>
 	</fx:Script>
 
     <s:HGroup width="100%" height="100%" paddingLeft="5" paddingRight="5" gap="5" verticalAlign="middle">
 
-        <!--<s:Label text="{TextureVO(data).name}" visible="{!isInEditMode}" includeInLayout="{!isInEditMode}"/>-->
-        <!--<s:TextInput id="editNameTextInput" text="{TextureVO(data).name}"-->
-        <!--visible="{isInEditMode}" includeInLayout="{isInEditMode}"-->
-        <!--enter="onEditImageEnter(event)"/>-->
+        <s:Label text="{ModelVO(data).name}" visible="{!isInEditMode}" includeInLayout="{!isInEditMode}"/>
+        <s:TextInput id="editNameTextInput" text="{ModelVO(data).name}"
+                     visible="{isInEditMode}" includeInLayout="{isInEditMode}"
+                     enter="onEditImageEnter(event)"/>
         <!--<s:Spacer width="100%"/>-->
         <!--<s:Label-->
         <!--text="{TextureVO(data).originalWidth}X{TextureVO(data).originalHeight} &ndash;&gt; {TextureVO(data).atfWidth}X{TextureVO(data).atfHeight}"/>-->
