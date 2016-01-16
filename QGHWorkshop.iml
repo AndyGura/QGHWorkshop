@@ -17,6 +17,9 @@
             <entry library-id="f7d78133-4bde-40ac-bd62-48d1aba2d9e5">
               <dependency linkage="Merged" />
             </entry>
+            <entry library-id="f85f07ab-9e1b-4eba-8080-f7dcf4a20f0b">
+              <dependency linkage="Merged" />
+            </entry>
           </entries>
           <sdk name="4.14.1.air-20.0" />
         </dependencies>
@@ -47,6 +50,16 @@
         <properties id="f7d78133-4bde-40ac-bd62-48d1aba2d9e5" />
         <CLASSES>
           <root url="jar://$MODULE_DIR$/libs/away3d-core-fp11_4_1_6.swc!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library type="flex">
+        <properties id="f85f07ab-9e1b-4eba-8080-f7dcf4a20f0b" />
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/starling.swc!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

@@ -2,12 +2,16 @@
 <components:Editor xmlns:fx="http://ns.adobe.com/mxml/2009"
                    xmlns:s="library://ns.adobe.com/flex/spark"
                    xmlns:components="com.andrewgura.ui.components.*"
+                   xmlns:stagecomponentswrapper="com.andrewgura.stageComponentsWrapper.*"
                    addedToStage="onAddedToStage(event)">
 
     <fx:Script><![CDATA[
+        import away3d.containers.Scene3D;
+
         import com.andrewgura.controllers.MainController;
         import com.andrewgura.controllers.QGHController;
         import com.andrewgura.events.DataObjectEvent;
+        import com.andrewgura.vo.ModelVO;
         import com.andrewgura.vo.ProjectVO;
         import com.andrewgura.vo.QGHProjectVO;
 
@@ -15,12 +19,9 @@
 
         [Bindable]
         private var modelToView:Bitmap;
-        //
-        //        [Bindable]
-        //        private var starlingPreviewImage:starling.display.Image;
-        //
-        //        [Bindable]
-        //        public var fontShowTextField:starling.text.TextField;
+
+        [Bindable]
+        private var viewScene:Scene3D = new Scene3D();
 
         override public function set project(value:ProjectVO):void {
             if (super.project == value) return;
@@ -56,26 +57,19 @@
             NativeDragManager.acceptDragDrop(this);
         }
 
-        //
-        //        private function updateBitmapToView(...bindings):Object {
-        //            if (!project || !list || !list.selectedItem || !list.dataProvider || !(list.selectedItem is TextureVO) || list.dataProvider != QGHProjectVO(project).imageCollection) {
-        //        modelToView
-        //                starlingPreviewImage = null;
-        //                return null;
-        //            }
-        //        modelToView
-        //            var texture:Texture = Texture.fromAtfData(TextureVO(list.selectedItem).atfData);
-        //            starlingPreviewImage = new starling.display.Image(texture);
-        //
-        //            var tabs:Array = [bitmapTabItem, atfTabItem];
-        //            if (list.selectedItem is TextureFontVO) {
-        //                tabs.push(fontTabItem);
-        //                fontShowTextField = new starling.text.TextField(500, 500, "The quick brown fox jumps over the lazy dog.", TextureVO(list.selectedItem).name, 32, 0xffffff);
-        //            }
-        //            viewModeTabBar.dataProvider = new ArrayCollection(tabs);
-        //
-        //            return null;
-        //        }
+
+        private function updateViewScene(...bindings):Object {
+            if (!project || !list || !list.selectedItem || !list.dataProvider || !(list.selectedItem is ModelVO) || list.dataProvider != QGHProjectVO(project).modelsCollection) {
+                return null;
+            }
+            if (viewScene.numChildren > 0 && viewScene.getChildAt(0) != ModelVO(list.selectedItem).mesh) {
+                viewScene.removeChildAt(0);
+            }
+            if (viewScene.numChildren == 0) {
+                viewScene.addChild(ModelVO(list.selectedItem).mesh);
+            }
+            return null;
+        }
 
         private function onExportQghClick(event:MouseEvent):void {
             controller.exportQGH();
@@ -102,11 +96,7 @@
     </fx:Script>
 
     <fx:Declarations>
-        <!--<fx:Object>-->
-        <!--{-->
-        <!--import com.andrewgura.vo.QGHProjectVO; updateBitmapToView(project, QGHProjectVO(project).imageCollection,-->
-        <!--TextureVO(list.selectedItem).sourceBitmap)}-->
-        <!--</fx:Object>-->
+        <fx:Object>{updateViewScene(project, QGHProjectVO(project).modelsCollection, ModelVO(list.selectedItem).mesh)}</fx:Object>
         <!--<fx:Object name="Source" id="bitmapTabItem"/>-->
         <!--<fx:Object name="ATF" id="atfTabItem"/>-->
         <!--<fx:Object name="Font" id="fontTabItem"/>-->
@@ -130,6 +120,7 @@
             <s:TabBar id="viewModeTabBar"
                       width="100%" labelField="name"/>
             <s:Group width="100%" height="100%">
+                <stagecomponentswrapper:AwaydSceneComponent top="1" left="1" right="1" bottom="1" scene="{viewScene}"/>
                 <s:Rect width="100%" height="100%">
                     <s:stroke>
                         <s:SolidColorStroke color="{getStyle('borderColor')}"/>

@@ -21,6 +21,9 @@ public class ModelLoader {
     public function loadByDescription(description:ModelDescriptionVO):void {
         var fullMesh:Mesh;
         for each (var subModelDescription:SubModelDescriptionVO in description.subModels) {
+            if (subModelDescription.vertexData.length == 0) {
+                continue;
+            }
             var subGeom:SubGeometry = new SubGeometry();
             subGeom.updateVertexData(subModelDescription.vertexData);
             subGeom.updateIndexData(subModelDescription.indexData);
