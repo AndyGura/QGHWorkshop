@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <stagecomponentswrapper:StageComponent xmlns:fx="http://ns.adobe.com/mxml/2009"
                                        xmlns:stagecomponentswrapper="com.andrewgura.stageComponentsWrapper.*"
-                                       xmlns:mx="library://ns.adobe.com/flex/mx" addedToStage="onAddedToStage(event)">
+                                       xmlns:mx="library://ns.adobe.com/flex/mx"
+                                       addedToStage="onAddedToStage(event)"
+                                       mouseMove="onMouseMove(event)" mouseUp="onMouseUp(event)">
 
     <fx:Script><![CDATA[
         import away3d.containers.Scene3D;
@@ -11,7 +13,12 @@
 
         private var _view:View3D;
         private var _scene:Scene3D;
+
         private var isAddedToStage:Boolean = false;
+
+        private var viewRho:Number = 944;
+        private var viewPhi:Number = 1;
+        private var viewTetta:Number = Math.PI / 4;
 
 
         [Bindable(event="sceneChanged")]
@@ -53,10 +60,6 @@
         }
 
         private function _onEnterFrame(e:Event):void {
-            if (_scene.numChildren > 0) {
-                _scene.getChildAt(0).rotationY += 0.5;
-                _scene.getChildAt(0).rotationY += 0.5;
-            }
             _view.render();
         }
 
@@ -66,10 +69,11 @@
                 _view.width = this.width;
                 _view.height = this.height;
                 uiComponent.addChild(_view);
-                _view.camera.z = -800;
-                _view.camera.y = 500;
-                _view.camera.lookAt(new Vector3D());
             }
+            _view.camera.x = viewRho * Number.sin(viewTetta) * Number.cos(viewPhi);
+            _view.camera.z = viewRho * Number.sin(viewTetta) * Number.sin(viewPhi);
+            _view.camera.y = viewRho * Number.cos(viewTetta);
+            _view.camera.lookAt(new Vector3D());
             _view.scene = _scene;
         }
 
@@ -77,6 +81,27 @@
         override protected function hideShowHandler(event:FlexEvent):void {
             super.hideShowHandler(event);
             updateAway3dScene();
+        }
+
+        private var oldLocalX:Number;
+        private var oldLocalY:Number;
+
+        private function onMouseMove(event:MouseEvent):void {
+            if (event.buttonDown) {
+                if (!isNaN(oldLocalX) && !isNaN(oldLocalY)) {
+                    viewPhi -= (event.localX - oldLocalX)/5;
+                    viewTetta -= (event.localY - oldLocalY)/5;
+                    viewTetta = Math.max(Math.min(viewTetta, Math.PI), 0.01);
+                    updateAway3dScene();
+                }
+                oldLocalX = event.localX;
+                oldLocalY = event.localY;
+            }
+        }
+
+        private function onMouseUp(event:MouseEvent):void {
+            oldLocalX = NaN;
+            oldLocalY = NaN;
         }
         ]]>
     </fx:Script>
