@@ -22,7 +22,7 @@
             config.projectFileType = new FileTypeVO('QGHWorkshop project file', 'qgp');
             config.importTypes = [
 //                new FileTypeVO('Images', 'png', 'jpg'),
-                new FileTypeVO('NFS1 resources', 'cfm')
+                new FileTypeVO('NFS1 resources', 'cfm', 'fam')
             ];
         }
         ]]>

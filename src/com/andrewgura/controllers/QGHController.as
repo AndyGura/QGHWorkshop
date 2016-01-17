@@ -1,5 +1,6 @@
 package com.andrewgura.controllers {
 import com.andrewgura.nfs12NativeFileFormats.NFSNativeResourceLoader;
+import com.andrewgura.nfs12NativeFileFormats.NativeOripFile;
 import com.andrewgura.nfs12NativeFileFormats.models.ModelDescriptionVO;
 import com.andrewgura.ui.popup.AppPopups;
 import com.andrewgura.ui.popup.PopupFactory;
@@ -35,22 +36,39 @@ public class QGHController {
         for each (var file:File in files) {
             switch (file.extension.toLowerCase()) {
                 case 'cfm':
+                case 'fam':
                     try {
                         var nfsModels:ArrayCollection = NFSNativeResourceLoader.loadNativeFile(file);
                     } catch (e:Error) {
                         PopupFactory.instance.showPopup(AppPopups.ERROR_POPUP, file.name + ": " + e.message);
                         continue;
                     }
-                        //TODO convert model to away3d model
-                    for each (var nfsModel:ModelDescriptionVO in nfsModels) {
-                        model = new ModelVO(nfsModel.name);
+                    nfsModels = removeCollectionTree(nfsModels);
+                    //TODO convert model to away3d model
+                    for each (var nfsModel:* in nfsModels) {
+                        if (!(nfsModel is NativeOripFile)) {
+                            continue;
+                        }
+                        model = new ModelVO(nfsModel.modelDescription.name);
                         addModel(model);
                         var loader:ModelLoader = new ModelLoader(model);
-                        loader.loadByDescription(nfsModel);
+                        loader.loadByDescription(nfsModel.modelDescription);
                     }
                     break;
             }
         }
+    }
+
+    private function removeCollectionTree(input:ArrayCollection):ArrayCollection {
+        var fullArchive:ArrayCollection = new ArrayCollection();
+        for each (var entry:* in input) {
+            if (entry is ArrayCollection) {
+                fullArchive.addAll(removeCollectionTree(entry));
+            } else {
+                fullArchive.addItem(entry);
+            }
+        }
+        return fullArchive;
     }
 
     public function exportQGH():void {
