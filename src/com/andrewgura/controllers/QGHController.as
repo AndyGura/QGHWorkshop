@@ -1,17 +1,24 @@
 package com.andrewgura.controllers {
 import com.andrewgura.nfs12NativeFileFormats.NFSNativeResourceLoader;
 import com.andrewgura.nfs12NativeFileFormats.NativeOripFile;
-import com.andrewgura.nfs12NativeFileFormats.models.ModelDescriptionVO;
+import com.andrewgura.nfs12NativeFileFormats.NativeShpiArchiveFile;
+import com.andrewgura.nfs12NativeFileFormats.NativeWwwwArchiveFile;
 import com.andrewgura.ui.popup.AppPopups;
 import com.andrewgura.ui.popup.PopupFactory;
 import com.andrewgura.utils.ModelLoader;
 import com.andrewgura.vo.ModelVO;
 import com.andrewgura.vo.QGHProjectVO;
+import com.andrewgura.vo.TCAProjectVO;
 
+import flash.desktop.NativeProcess;
+import flash.desktop.NativeProcessStartupInfo;
 import flash.filesystem.File;
+import flash.filesystem.FileMode;
+import flash.filesystem.FileStream;
+import flash.utils.ByteArray;
+import flash.utils.setTimeout;
 
 import mx.collections.ArrayCollection;
-
 import mx.events.CollectionEvent;
 import mx.events.CollectionEventKind;
 
@@ -32,7 +39,6 @@ public class QGHController {
     }
 
     public function importFiles(files:Array):void {
-        var model:ModelVO;
         for each (var file:File in files) {
             switch (file.extension.toLowerCase()) {
                 case 'cfm':
@@ -43,32 +49,64 @@ public class QGHController {
                         PopupFactory.instance.showPopup(AppPopups.ERROR_POPUP, file.name + ": " + e.message);
                         continue;
                     }
-                    nfsModels = removeCollectionTree(nfsModels);
-                    //TODO convert model to away3d model
-                    for each (var nfsModel:* in nfsModels) {
-                        if (!(nfsModel is NativeOripFile)) {
-                            continue;
-                        }
-                        model = new ModelVO(nfsModel.modelDescription.name);
-                        addModel(model);
-                        var loader:ModelLoader = new ModelLoader(model);
-                        loader.loadByDescription(nfsModel.modelDescription);
-                    }
+                    processWwwwArchive(nfsModels, file.name.substr(0, file.name.lastIndexOf('.')));
                     break;
             }
         }
     }
 
-    private function removeCollectionTree(input:ArrayCollection):ArrayCollection {
-        var fullArchive:ArrayCollection = new ArrayCollection();
-        for each (var entry:* in input) {
-            if (entry is ArrayCollection) {
-                fullArchive.addAll(removeCollectionTree(entry));
-            } else {
-                fullArchive.addItem(entry);
+    private function processWwwwArchive(archive:ArrayCollection, name:String):void {
+        var wwwwArchivesCount:Number = 0;
+        var textureCollections:ArrayCollection = new ArrayCollection();
+        for each (var thing:* in archive) {
+            switch (true) {
+                case thing is NativeOripFile:
+                    var model:ModelVO = new ModelVO(thing.modelDescription.name);
+                    addModel(model);
+                    var loader:ModelLoader = new ModelLoader(model);
+                    loader.loadByDescription(thing.modelDescription);
+                    break;
+                case thing is NativeShpiArchiveFile:
+                    textureCollections.addItem(thing);
+                    break;
+                case thing is NativeWwwwArchiveFile:
+                    processWwwwArchive(thing, name + '.' + wwwwArchivesCount++);
+                    break;
             }
         }
-        return fullArchive;
+        if (textureCollections.length > 0) {
+            var tempDirectory:File = File.createTempDirectory();
+            for each (var textureCollection:NativeShpiArchiveFile in textureCollections) {
+                var tca:TCAProjectVO = new TCAProjectVO();
+                tca.name = name + "_" + textureCollections.getItemIndex(textureCollection);
+                (new TCAController(tca)).importNfsData(textureCollection);
+                setTimeout(function saveAndOpenTCA(tca:TCAProjectVO):void {
+                    if (!tca.isFullyLoaded) {
+                        setTimeout(saveAndOpenTCA, 2000, tca);
+                        return;
+                    }
+                    var file:File = new File(tempDirectory.nativePath + '\\' + tca.name + '.tcp');
+                    var fs:FileStream = new FileStream();
+                    fs.open(file, FileMode.WRITE);
+                    var exportedTCA:ByteArray = tca.serialize();
+                    fs.writeBytes(exportedTCA, 0, exportedTCA.length);
+                    fs.close();
+                    trace('$$$$ Found ' + textureCollections.length + ' SHPI files. Saved to ' + tempDirectory.nativePath);
+
+                    var cmdFile:File = new File("c:\\Windows\\System32\\cmd.exe");
+                    var nativeProcess:NativeProcess = new NativeProcess();
+                    var nativeProcessStartupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+                    nativeProcessStartupInfo.executable = cmdFile;
+                    nativeProcessStartupInfo.workingDirectory = tempDirectory;
+                    var args:Vector.<String> = new Vector.<String>();
+                    args.push(name + '.tcp');
+                    nativeProcessStartupInfo.arguments = args;
+                    nativeProcess.start(nativeProcessStartupInfo);
+                    nativeProcess.closeInput();
+
+                }, 2000, tca);
+            }
+        }
     }
 
     public function exportQGH():void {
@@ -99,7 +137,7 @@ public class QGHController {
 //        fs.writeBytes(tcaData);
 //        fs.close();
 //        PopupFactory.instance.showPopup(AppPopups.INFO_POPUP, 'Export success!');
-}
+    }
 
 //    private function exportError(msg:String):void {
 //        PopupFactory.instance.showPopup(AppPopups.ERROR_POPUP, msg, true, null, onOkClick);
@@ -136,7 +174,7 @@ public class QGHController {
     }
 
     public function getModelByName(name:String):ModelVO {
-        for each (var texture:ModelVO in project.modelsCollection) {
+        for each (var texture:* in project.modelsCollection) {
             if (texture.name == name) {
                 return texture;
             }

@@ -15,11 +15,17 @@
         import com.andrewgura.vo.ProjectVO;
         import com.andrewgura.vo.QGHProjectVO;
 
+        import starling.display.Image;
+
         private var controller:QGHController;
 
         [Bindable]
         private var modelToView:Bitmap;
 
+        [Bindable]
+        private var bitmapToView:Bitmap;
+        [Bindable]
+        private var starlingPreviewImage:Image;
         [Bindable]
         private var viewScene:Scene3D = new Scene3D();
 
@@ -60,6 +66,9 @@
 
         private function updateViewScene(...bindings):Object {
             if (!project || !list || !list.selectedItem || !list.dataProvider || !(list.selectedItem is ModelVO) || list.dataProvider != QGHProjectVO(project).modelsCollection) {
+                if (viewScene.numChildren > 0) {
+                    viewScene.removeChildAt(0);
+                }
                 return null;
             }
             if (viewScene.numChildren > 0 && viewScene.getChildAt(0) != ModelVO(list.selectedItem).mesh) {
@@ -96,10 +105,8 @@
     </fx:Script>
 
     <fx:Declarations>
-        <fx:Object>{updateViewScene(project, QGHProjectVO(project).modelsCollection, ModelVO(list.selectedItem).mesh)}</fx:Object>
-        <!--<fx:Object name="Source" id="bitmapTabItem"/>-->
-        <!--<fx:Object name="ATF" id="atfTabItem"/>-->
-        <!--<fx:Object name="Font" id="fontTabItem"/>-->
+        <fx:Object>{updateViewScene(project, QGHProjectVO(project).modelsCollection, ModelVO(list.selectedItem).mesh)}
+        </fx:Object>
     </fx:Declarations>
 
     <s:HGroup width="100%" height="100%"
@@ -117,8 +124,6 @@
             </s:HGroup>
         </s:VGroup>
         <s:VGroup width="100%" height="100%" gap="-1">
-            <s:TabBar id="viewModeTabBar"
-                      width="100%" labelField="name"/>
             <s:Group width="100%" height="100%">
                 <stagecomponentswrapper:AwaydSceneComponent top="1" left="1" right="1" bottom="1" scene="{viewScene}"/>
                 <s:Rect width="100%" height="100%">
