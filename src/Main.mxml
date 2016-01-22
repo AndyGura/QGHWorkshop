@@ -6,7 +6,8 @@
 
     <fx:Script><![CDATA[
         import com.andrewgura.ui.components.QGHEditor;
-        import com.andrewgura.ui.components.QGHSettingsPanel;
+        import com.andrewgura.ui.components.QGHProjectSettingsPanel;
+        import com.andrewgura.ui.components.QGHWorkshopSettingsPanel;
         import com.andrewgura.vo.FileTypeVO;
         import com.andrewgura.vo.QGHProjectVO;
         import com.andrewgura.vo.WorkshopConfigVO;
@@ -18,10 +19,10 @@
             config = new WorkshopConfigVO();
             config.editorClass = QGHEditor;
             config.projectClass = QGHProjectVO;
-            config.settingsPanelClass = QGHSettingsPanel;
+            config.projectSettingsPanelClass = QGHProjectSettingsPanel;
+            config.workshopSettingsPanelClass = QGHWorkshopSettingsPanel;
             config.projectFileType = new FileTypeVO('QGHWorkshop project file', 'qgp');
             config.importTypes = [
-//                new FileTypeVO('Images', 'png', 'jpg'),
                 new FileTypeVO('NFS1 resources', 'cfm', 'fam')
             ];
         }
