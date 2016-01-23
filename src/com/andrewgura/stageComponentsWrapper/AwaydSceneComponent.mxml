@@ -10,6 +10,7 @@
         import away3d.containers.View3D;
 
         import mx.events.FlexEvent;
+        import mx.events.ResizeEvent;
 
         private var _view:View3D;
         private var _scene:Scene3D;
@@ -42,7 +43,12 @@
         }
 
         private function onAddedToStage(event:Event):void {
+            instances.push(this);
             addEventListener(Event.ENTER_FRAME, _onEnterFrame);
+            if (!isReady) {
+                addedToStageHandlers.push(onAddedToStage);
+                return;
+            }
             isAddedToStage = true;
             updateMask();
             setupParents();
@@ -50,17 +56,11 @@
                 setMask();
                 isShow = true;
                 visibleStarlingComponentsCount++;
-                if (visibleStarlingComponentsCount == 1) {
-                    onStageResized();
-                }
+                onStageResized();
             }
             if (_scene) {
                 updateAway3dScene();
             }
-        }
-
-        private function _onEnterFrame(e:Event):void {
-            _view.render();
         }
 
         private function updateAway3dScene():void {
@@ -68,6 +68,9 @@
                 _view = new View3D();
                 _view.width = this.width;
                 _view.height = this.height;
+                _view.stage3DProxy = StageComponent.stage3DProxy;
+                _view.shareContext = true;
+                StageComponent.stage3DProxy.color = getStyle('contentBackgroundColor');
                 uiComponent.addChild(_view);
             }
             _view.camera.x = viewRho * Number.sin(viewTetta) * Number.cos(viewPhi);
@@ -89,8 +92,8 @@
         private function onMouseMove(event:MouseEvent):void {
             if (event.buttonDown) {
                 if (!isNaN(oldLocalX) && !isNaN(oldLocalY)) {
-                    viewPhi -= (event.localX - oldLocalX)/5;
-                    viewTetta -= (event.localY - oldLocalY)/5;
+                    viewPhi -= (event.localX - oldLocalX) / 5;
+                    viewTetta -= (event.localY - oldLocalY) / 5;
                     viewTetta = Math.max(Math.min(viewTetta, Math.PI), 0.01);
                     updateAway3dScene();
                 }
@@ -102,6 +105,10 @@
         private function onMouseUp(event:MouseEvent):void {
             oldLocalX = NaN;
             oldLocalY = NaN;
+        }
+
+        override protected function render():void {
+            _view.render();
         }
         ]]>
     </fx:Script>

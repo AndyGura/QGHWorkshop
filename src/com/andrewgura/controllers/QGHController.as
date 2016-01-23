@@ -29,23 +29,23 @@ public class QGHController {
 
     public function QGHController(project:QGHProjectVO) {
         this.project = project;
-        this.project.modelsCollection.addEventListener(CollectionEvent.COLLECTION_CHANGE, onModelsChange);
+        this.project.contentCollection.addEventListener(CollectionEvent.COLLECTION_CHANGE, onModelsChange);
     }
 
     public function onModelsChange(event:CollectionEvent):void {
         project.isChangesSaved = false;
         if (event.kind == CollectionEventKind.ADD || event.kind == CollectionEventKind.MOVE || event.kind == CollectionEventKind.UPDATE || event.kind == CollectionEventKind.REPLACE) {
-            project.modelsCollection.refresh();
+            project.contentCollection.refresh();
         }
     }
 
-    private var tempDirectory:File;
-    private var tcaToSaveNames:ArrayCollection = new ArrayCollection();
+//    private var tempDirectory:File;
+//    private var tcaToSaveNames:ArrayCollection = new ArrayCollection();
 
     public function importFiles(files:Array):void {
-        if (!tempDirectory || !tempDirectory.exists) {
-            tempDirectory = File.createTempDirectory();
-        }
+//        if (!tempDirectory || !tempDirectory.exists) {
+//            tempDirectory = File.createTempDirectory();
+//        }
         for each (var file:File in files) {
             switch (file.extension.toLowerCase()) {
                 case 'cfm':
@@ -86,40 +86,41 @@ public class QGHController {
                 var tca:TCAProjectVO = new TCAProjectVO();
                 tca.name = name + "_" + textureCollections.getItemIndex(textureCollection);
                 tca.addEventListener(TCAProjectVO.LOADING_COMPLETE, saveAndOpenTCA);
-                tcaToSaveNames.addItem(tca.name);
+//                tcaToSaveNames.addItem(tca.name);
                 (new TCAController(tca)).importNfsData(textureCollection);
             }
         }
 
         function saveAndOpenTCA(event:Event):void {
-            var tca:TCAProjectVO = TCAProjectVO(event.target);
-            var file:File = new File(tempDirectory.nativePath + '/' + tca.name + '.tcp');
-            var fs:FileStream = new FileStream();
-            fs.open(file, FileMode.WRITE);
-            var exportedTCA:ByteArray = tca.serialize();
-            fs.writeBytes(exportedTCA, 0, exportedTCA.length);
-            fs.close();
-
-            var config:Object = PersistanceController.getResource(SharedObjectConsts.WORKSHOP_SETTINGS);
-            if (!config) {
-                return;
-            }
-            var exeFile:File = new File(config.tcaWorkshopPath);
-            if (!exeFile.exists) {
-                return;
-            }
-            var nativeProcess:NativeProcess = new NativeProcess();
-            var nativeProcessStartupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-            nativeProcessStartupInfo.executable = exeFile;
-            var args:Vector.<String> = new Vector.<String>();
-            args.push(tempDirectory.nativePath + '/' + tca.name + '.tcp');
-            nativeProcessStartupInfo.arguments = args;
-            nativeProcess.start(nativeProcessStartupInfo);
-            nativeProcess.closeInput();
-            tcaToSaveNames.removeItem(tca.name);
-            if (tcaToSaveNames.length == 0) {
-                tempDirectory.deleteDirectoryAsync(true);
-            }
+//            var tca:TCAProjectVO = TCAProjectVO(event.target);
+            project.contentCollection.addItem(event.target);
+//            var file:File = new File(tempDirectory.nativePath + '/' + tca.name + '.tcp');
+//            var fs:FileStream = new FileStream();
+//            fs.open(file, FileMode.WRITE);
+//            var exportedTCA:ByteArray = tca.serialize();
+//            fs.writeBytes(exportedTCA, 0, exportedTCA.length);
+//            fs.close();
+//
+//            var config:Object = PersistanceController.getResource(SharedObjectConsts.WORKSHOP_SETTINGS);
+//            if (!config) {
+//                return;
+//            }
+//            var exeFile:File = new File(config.tcaWorkshopPath);
+//            if (!exeFile.exists) {
+//                return;
+//            }
+//            var nativeProcess:NativeProcess = new NativeProcess();
+//            var nativeProcessStartupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+//            nativeProcessStartupInfo.executable = exeFile;
+//            var args:Vector.<String> = new Vector.<String>();
+//            args.push(tempDirectory.nativePath + '/' + tca.name + '.tcp');
+//            nativeProcessStartupInfo.arguments = args;
+//            nativeProcess.start(nativeProcessStartupInfo);
+//            nativeProcess.closeInput();
+//            tcaToSaveNames.removeItem(tca.name);
+//            if (tcaToSaveNames.length == 0) {
+//                tempDirectory.deleteDirectoryAsync(true);
+//            }
         }
 
     }
@@ -164,15 +165,15 @@ public class QGHController {
     public function addModel(texture:ModelVO):void {
         var newName:String = getNewNameForDuplicate(texture.name);
         texture.name = newName;
-        project.modelsCollection.addItem(texture);
+        project.contentCollection.addItem(texture);
     }
 
     public function deleteItems(items:Array):void {
-        if (project.modelsCollection.length == 0) {
+        if (project.contentCollection.length == 0) {
             return;
         }
         for each (var item:* in items) {
-            project.modelsCollection.removeItem(item);
+            project.contentCollection.removeItem(item);
         }
     }
 
@@ -180,7 +181,7 @@ public class QGHController {
         var newName:String = name;
         var i:Number = 0;
         var foundTexture:ModelVO = getModelByName(newName);
-        while (foundTexture != null && project.modelsCollection.getItemIndex(foundTexture) != excludeIndex) {
+        while (foundTexture != null && project.contentCollection.getItemIndex(foundTexture) != excludeIndex) {
             i++;
             newName = name + '_' + i;
             foundTexture = getModelByName(newName);
@@ -189,7 +190,7 @@ public class QGHController {
     }
 
     public function getModelByName(name:String):ModelVO {
-        for each (var texture:* in project.modelsCollection) {
+        for each (var texture:* in project.contentCollection) {
             if (texture.name == name) {
                 return texture;
             }

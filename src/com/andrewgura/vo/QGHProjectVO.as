@@ -13,14 +13,14 @@ import spark.collections.SortField;
 public class QGHProjectVO extends ProjectVO {
 
     public var outputQghPath:String = '';
-    public var modelsCollection:ArrayCollection = new ArrayCollection();
+    public var contentCollection:ArrayCollection = new ArrayCollection();
 
     public function QGHProjectVO() {
         super();
         var sort:Sort = new Sort();
         sort.fields = [new SortField("name")];
-        modelsCollection.sort = sort;
-        modelsCollection.refresh();
+        contentCollection.sort = sort;
+        contentCollection.refresh();
     }
 
     override public function serialize():ByteArray {

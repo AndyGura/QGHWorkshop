@@ -11,16 +11,18 @@
         import com.andrewgura.controllers.MainController;
         import com.andrewgura.controllers.QGHController;
         import com.andrewgura.events.DataObjectEvent;
+        import com.andrewgura.ui.itemRenderers.ModelListItemRenderer;
+        import com.andrewgura.ui.itemRenderers.TcaListItemRenderer;
         import com.andrewgura.vo.ModelVO;
         import com.andrewgura.vo.ProjectVO;
         import com.andrewgura.vo.QGHProjectVO;
+        import com.andrewgura.vo.TCAProjectVO;
+
+        import spark.components.supportClasses.ItemRenderer;
 
         import starling.display.Image;
 
         private var controller:QGHController;
-
-        [Bindable]
-        private var modelToView:Bitmap;
 
         [Bindable]
         private var bitmapToView:Bitmap;
@@ -65,7 +67,7 @@
 
 
         private function updateViewScene(...bindings):Object {
-            if (!project || !list || !list.selectedItem || !list.dataProvider || !(list.selectedItem is ModelVO) || list.dataProvider != QGHProjectVO(project).modelsCollection) {
+            if (!project || !list || !list.selectedItem || !list.dataProvider || !(list.selectedItem is ModelVO) || list.dataProvider != QGHProjectVO(project).contentCollection) {
                 if (viewScene.numChildren > 0) {
                     viewScene.removeChildAt(0);
                 }
@@ -98,23 +100,34 @@
         //        }
 
         private function onRenameModel(event:DataObjectEvent):void {
-            var newName:String = controller.getNewNameForDuplicate(event.data.newName, QGHProjectVO(project).modelsCollection.getItemIndex(event.data.texture));
+            var newName:String = controller.getNewNameForDuplicate(event.data.newName, QGHProjectVO(project).contentCollection.getItemIndex(event.data.texture));
             event.data.model.name = newName;
+        }
+
+        private function listItemRendererFunction(item:Object):IFactory {
+            if (item is ModelVO) {
+                return new ClassFactory(ModelListItemRenderer);
+            } else if (item is TCAProjectVO) {
+                return new ClassFactory(TcaListItemRenderer);
+            } else {
+                return new ClassFactory(ItemRenderer);
+            }
         }
         ]]>
     </fx:Script>
 
     <fx:Declarations>
-        <fx:Object>{updateViewScene(project, QGHProjectVO(project).modelsCollection, ModelVO(list.selectedItem).mesh)}
+        <fx:Object>{updateViewScene(project, QGHProjectVO(project).contentCollection, (list.selectedItem is ModelVO ?
+            ModelVO(list.selectedItem).mesh : null))}
         </fx:Object>
     </fx:Declarations>
 
     <s:HGroup width="100%" height="100%"
               visible="{project}">
         <s:VGroup height="100%">
-            <s:List id="list" dataProvider="{QGHProjectVO(project).modelsCollection}"
+            <s:List id="list" dataProvider="{QGHProjectVO(project).contentCollection}"
                     allowMultipleSelection="true"
-                    itemRenderer="com.andrewgura.ui.itemRenderers.ModelListItemRenderer"
+                    itemRendererFunction="listItemRendererFunction"
                     width="400" height="100%"/>
             <s:HGroup width="100%" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
                 <s:Button label="Add" click="addItemClickHandler(event)"/>
@@ -123,16 +136,22 @@
                 <s:Button label="EXPORT QGH" click="onExportQghClick(event)"/>
             </s:HGroup>
         </s:VGroup>
-        <s:VGroup width="100%" height="100%" gap="-1">
+        <components:TCAEditor width="100%" height="100%"
+                              project="{list.selectedItem as TCAProjectVO}"
+                              visible="{list.selectedItem is TCAProjectVO}"
+                              includeInLayout="{list.selectedItem is TCAProjectVO}"/>
+        <s:VGroup width="100%" height="100%" gap="-1"
+                  visible="{viewScene &amp;&amp; list.selectedItem &amp;&amp; list.selectedItem is ModelVO}"
+                  includeInLayout="{viewScene &amp;&amp; list.selectedItem &amp;&amp; list.selectedItem is ModelVO}">
             <s:Group width="100%" height="100%">
-                <stagecomponentswrapper:AwaydSceneComponent top="1" left="1" right="1" bottom="1" scene="{viewScene}"/>
+                <stagecomponentswrapper:AwaydSceneComponent top="1" left="1" right="1" bottom="1" scene="{viewScene}" width="100%" height="100%"/>
                 <s:Rect width="100%" height="100%">
                     <s:stroke>
                         <s:SolidColorStroke color="{getStyle('borderColor')}"/>
                     </s:stroke>
                 </s:Rect>
             </s:Group>
-            <s:HGroup width="100%" verticalAlign="middle" visible="{modelToView}" includeInLayout="{modelToView}">
+            <s:HGroup width="100%" verticalAlign="middle">
                 <!-- info about selected model -->
             </s:HGroup>
         </s:VGroup>
