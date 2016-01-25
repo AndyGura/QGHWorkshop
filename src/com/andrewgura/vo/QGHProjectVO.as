@@ -14,6 +14,7 @@ public class QGHProjectVO extends ProjectVO {
 
     public var outputQghPath:String = '';
     public var contentCollection:ArrayCollection = new ArrayCollection();
+    public var attachedTCA:TCAProjectVO;
 
     public function QGHProjectVO() {
         super();

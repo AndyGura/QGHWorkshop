@@ -20,6 +20,9 @@
             <entry library-id="f85f07ab-9e1b-4eba-8080-f7dcf4a20f0b">
               <dependency linkage="Merged" />
             </entry>
+            <entry module-name="StarlingAway3DinFlex" build-configuration-name="StarlingAway3DinFlex">
+              <dependency linkage="Merged" />
+            </entry>
           </entries>
           <sdk name="4.14.1.air-20.0" />
         </dependencies>
@@ -31,6 +34,7 @@
         <packaging-air-desktop use-generated-descriptor="false" custom-descriptor-path="$MODULE_DIR$/Main-app.xml" package-file-name="Main">
           <files-to-package>
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/../TCAWorkshop/src/assets" path-in-package="assets" />
+            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets" path-in-package="assets" />
           </files-to-package>
         </packaging-air-desktop>
         <packaging-android />
@@ -46,6 +50,7 @@
     </content>
     <content url="file://$MODULE_DIR$/../TCAWorkshop">
       <sourceFolder url="file://$MODULE_DIR$/../TCAWorkshop/src" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/../TCAWorkshop/out" />
     </content>
     <orderEntry type="jdk" jdkName="4.14.1.air-20.0" jdkType="Flex SDK Type (new)" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -72,5 +77,6 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="StarlingAway3DinFlex" exported="" />
   </component>
 </module>
