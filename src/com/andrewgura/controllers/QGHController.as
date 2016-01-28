@@ -1,5 +1,4 @@
 package com.andrewgura.controllers {
-import com.andrewgura.consts.SharedObjectConsts;
 import com.andrewgura.nfs12NativeFileFormats.NFSNativeResourceLoader;
 import com.andrewgura.nfs12NativeFileFormats.NativeOripFile;
 import com.andrewgura.nfs12NativeFileFormats.NativeShpiArchiveFile;
@@ -11,13 +10,8 @@ import com.andrewgura.vo.ModelVO;
 import com.andrewgura.vo.QGHProjectVO;
 import com.andrewgura.vo.TCAProjectVO;
 
-import flash.desktop.NativeProcess;
-import flash.desktop.NativeProcessStartupInfo;
 import flash.events.Event;
 import flash.filesystem.File;
-import flash.filesystem.FileMode;
-import flash.filesystem.FileStream;
-import flash.utils.ByteArray;
 
 import mx.collections.ArrayCollection;
 import mx.events.CollectionEvent;
@@ -39,13 +33,20 @@ public class QGHController {
         }
     }
 
-//    private var tempDirectory:File;
-//    private var tcaToSaveNames:ArrayCollection = new ArrayCollection();
+    public function applyMaterials():void {
+        if (!project || !project.contentCollection || !project.attachedTCA || !project.attachedTCA.imageCollection) {
+            return;
+        }
+        for each (var item:* in project.contentCollection) {
+            if (!(item is ModelVO)) {
+                continue;
+            }
+            var modelLoader:ModelLoader = new ModelLoader(item as ModelVO);
+            modelLoader.load(project.attachedTCA.imageCollection);
+        }
+    }
 
     public function importFiles(files:Array):void {
-//        if (!tempDirectory || !tempDirectory.exists) {
-//            tempDirectory = File.createTempDirectory();
-//        }
         for each (var file:File in files) {
             switch (file.extension.toLowerCase()) {
                 case 'cfm':
@@ -69,9 +70,10 @@ public class QGHController {
             switch (true) {
                 case thing is NativeOripFile:
                     var model:ModelVO = new ModelVO(thing.modelDescription.name);
+                    model.modelDescription = thing.modelDescription;
                     addModel(model);
                     var loader:ModelLoader = new ModelLoader(model);
-                    loader.loadByDescription(thing.modelDescription);
+                    loader.load();
                     break;
                 case thing is NativeShpiArchiveFile:
                     textureCollections.addItem(thing);
@@ -92,35 +94,7 @@ public class QGHController {
         }
 
         function saveAndOpenTCA(event:Event):void {
-//            var tca:TCAProjectVO = TCAProjectVO(event.target);
             project.contentCollection.addItem(event.target);
-//            var file:File = new File(tempDirectory.nativePath + '/' + tca.name + '.tcp');
-//            var fs:FileStream = new FileStream();
-//            fs.open(file, FileMode.WRITE);
-//            var exportedTCA:ByteArray = tca.serialize();
-//            fs.writeBytes(exportedTCA, 0, exportedTCA.length);
-//            fs.close();
-//
-//            var config:Object = PersistanceController.getResource(SharedObjectConsts.WORKSHOP_SETTINGS);
-//            if (!config) {
-//                return;
-//            }
-//            var exeFile:File = new File(config.tcaWorkshopPath);
-//            if (!exeFile.exists) {
-//                return;
-//            }
-//            var nativeProcess:NativeProcess = new NativeProcess();
-//            var nativeProcessStartupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-//            nativeProcessStartupInfo.executable = exeFile;
-//            var args:Vector.<String> = new Vector.<String>();
-//            args.push(tempDirectory.nativePath + '/' + tca.name + '.tcp');
-//            nativeProcessStartupInfo.arguments = args;
-//            nativeProcess.start(nativeProcessStartupInfo);
-//            nativeProcess.closeInput();
-//            tcaToSaveNames.removeItem(tca.name);
-//            if (tcaToSaveNames.length == 0) {
-//                tempDirectory.deleteDirectoryAsync(true);
-//            }
         }
 
     }

@@ -5,6 +5,7 @@ import com.andrewgura.controllers.QGHController;
 import flash.utils.ByteArray;
 
 import mx.collections.ArrayCollection;
+import mx.events.CollectionEvent;
 
 import spark.collections.Sort;
 import spark.collections.SortField;
@@ -12,9 +13,24 @@ import spark.collections.SortField;
 [Bindable]
 public class QGHProjectVO extends ProjectVO {
 
+    public static const ATTACHED_TEXTURES_CHANGE:String = "ATTACHED_TEXTURES_CHANGE";
+
     public var outputQghPath:String = '';
     public var contentCollection:ArrayCollection = new ArrayCollection();
-    public var attachedTCA:TCAProjectVO;
+    private var _attachedTCA:TCAProjectVO;
+    public function get attachedTCA():TCAProjectVO {
+        return _attachedTCA;
+    }
+
+    public function set attachedTCA(value:TCAProjectVO):void {
+        if (_attachedTCA) {
+            _attachedTCA.removeEventListener(TCAProjectVO.TEXTURES_COLLECTION_CHANGE, onTexturesChange);
+        }
+        _attachedTCA = value;
+        if (_attachedTCA) {
+            _attachedTCA.addEventListener(TCAProjectVO.TEXTURES_COLLECTION_CHANGE, onTexturesChange);
+        }
+    }
 
     public function QGHProjectVO() {
         super();
@@ -39,6 +55,9 @@ public class QGHProjectVO extends ProjectVO {
         (new QGHController(this)).importFiles(files);
     }
 
+    private function onTexturesChange(event:CollectionEvent):void {
+        dispatchEvent(new CollectionEvent(ATTACHED_TEXTURES_CHANGE, false, false, event.kind, event.location, event.oldLocation, event.items));
+    }
 
 }
 

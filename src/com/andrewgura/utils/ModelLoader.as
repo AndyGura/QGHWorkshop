@@ -4,10 +4,13 @@ import away3d.core.base.SubGeometry;
 import away3d.entities.Mesh;
 import away3d.materials.ColorMaterial;
 import away3d.materials.MaterialBase;
+import away3d.materials.TextureMaterial;
+import away3d.textures.ATFTexture;
 
-import com.andrewgura.nfs12NativeFileFormats.models.ModelDescriptionVO;
 import com.andrewgura.nfs12NativeFileFormats.models.SubModelDescriptionVO;
 import com.andrewgura.vo.ModelVO;
+
+import mx.collections.ArrayCollection;
 
 public class ModelLoader {
 
@@ -18,9 +21,10 @@ public class ModelLoader {
         super();
     }
 
-    public function loadByDescription(description:ModelDescriptionVO):void {
+    public function load(textures:ArrayCollection = null):void {
+        trace("### MODEL LOAD ROUTINE!!!");
         var fullMesh:Mesh;
-        for each (var subModelDescription:SubModelDescriptionVO in description.subModels) {
+        for each (var subModelDescription:SubModelDescriptionVO in model.modelDescription.subModels) {
             if (subModelDescription.vertexData.length == 0) {
                 continue;
             }
@@ -30,7 +34,19 @@ public class ModelLoader {
             subGeom.updateUVData(subModelDescription.uvData);
             var geom:Geometry = new Geometry;
             geom.addSubGeometry(subGeom);
-            var material:MaterialBase = new ColorMaterial(Math.random() * 0xffffff);
+            var texture:com.andrewgura.vo.TextureVO;
+            if (textures) {
+                for each (var t:com.andrewgura.vo.TextureVO in textures) {
+                    if (t.name == subModelDescription.textureID) {
+                        texture = t;
+                        break;
+                    }
+                }
+            }
+            if (texture) {
+                texture.atfData.position = 0;
+            }
+            var material:MaterialBase = texture ? new TextureMaterial(new ATFTexture(texture.atfData)) : new ColorMaterial(Math.random() * 0xffffff);
             if (!fullMesh) {
                 fullMesh = new Mesh(geom, material);
             } else {

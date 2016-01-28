@@ -2,6 +2,8 @@ package com.andrewgura.vo {
 
 import away3d.entities.Mesh;
 
+import com.andrewgura.nfs12NativeFileFormats.models.ModelDescriptionVO;
+
 import flash.utils.ByteArray;
 
 [Bindable]
@@ -9,6 +11,7 @@ public class ModelVO {
 
     public var name:String;
     public var mesh:Mesh;
+    public var modelDescription:ModelDescriptionVO;
 
     public var processingProgress:Number = 0;
 
