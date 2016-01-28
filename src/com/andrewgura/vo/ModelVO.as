@@ -3,6 +3,8 @@ package com.andrewgura.vo {
 import away3d.entities.Mesh;
 
 import com.andrewgura.nfs12NativeFileFormats.models.ModelDescriptionVO;
+import com.andrewgura.nfs12NativeFileFormats.models.SubModelDescriptionVO;
+import com.andrewgura.utils.ModelLoader;
 
 import flash.utils.ByteArray;
 
@@ -19,25 +21,25 @@ public class ModelVO {
         this.name = name;
     }
 
-    public function serialize():ByteArray {
-        var output:ByteArray = new ByteArray();
-//        output.writeObject({name: name, atfData: atfData, atfWidth: atfWidth, atfHeight: atfHeight});
-//        var rect:Rectangle = new Rectangle(0, 0, sourceBitmap.width, sourceBitmap.height);
-//        var bytes:ByteArray = sourceBitmap.bitmapData.getPixels(rect);
-//        output.writeObject({rect: rect, data: bytes});
-        return output;
+    public function serialize():Object {
+        var subModels:Array = [];
+        for each (var subModel:SubModelDescriptionVO in modelDescription.subModels) {
+            subModels.push({matId: subModel.textureID, vertexData: subModel.vertexData, indexData: subModel.indexData, uvData: subModel.uvData});
+        }
+        return {name: name, subModels: subModels};
     }
 
-    public function deserialize(data:ByteArray):void {
-//        var o:* = data.readObject();
-//        for (var field:String in o) {
-//            this[field] = o[field];
-//        }
-//        o = data.readObject();
-//        var rect:Rectangle = new Rectangle(0, 0, o.rect.width, o.rect.height);
-//        var bitmapData:BitmapData = new BitmapData(rect.width, rect.height, true);
-//        bitmapData.setPixels(rect, o.data);
-//        sourceBitmap = new Bitmap(bitmapData);
+    public function deserialize(data:Object):void {
+        for (var i:Number = 0; i < (data.subModels as Array).length; i++) {
+            var subModelDesc:SubModelDescriptionVO = new SubModelDescriptionVO(data.subModels[i].matId);
+            subModelDesc.textureID = data.subModels[i].matId;
+            subModelDesc.vertexData = data.subModels[i].vertexData;
+            subModelDesc.indexData = data.subModels[i].indexData;
+            subModelDesc.uvData = data.subModels[i].uvData;
+            modelDescription.subModels.addItem(subModelDesc);
+        }
+        var modelLoader:ModelLoader = new ModelLoader(this);
+        modelLoader.load();
     }
 
 }

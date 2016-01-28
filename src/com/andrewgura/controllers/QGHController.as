@@ -1,4 +1,9 @@
 package com.andrewgura.controllers {
+import away3d.entities.Mesh;
+import away3d.tools.serialize.Serialize;
+import away3d.tools.serialize.SerializerBase;
+import away3d.tools.serialize.SerializerBase;
+
 import com.andrewgura.nfs12NativeFileFormats.NFSNativeResourceLoader;
 import com.andrewgura.nfs12NativeFileFormats.NativeOripFile;
 import com.andrewgura.nfs12NativeFileFormats.NativeShpiArchiveFile;
@@ -12,6 +17,9 @@ import com.andrewgura.vo.TCAProjectVO;
 
 import flash.events.Event;
 import flash.filesystem.File;
+import flash.filesystem.FileMode;
+import flash.filesystem.FileStream;
+import flash.utils.ByteArray;
 
 import mx.collections.ArrayCollection;
 import mx.events.CollectionEvent;
@@ -100,41 +108,41 @@ public class QGHController {
     }
 
     public function exportQGH():void {
-//        var outputDirectory:File;
-//        var outputPath:String = QGHProjectVO(project).outputQghPath;
-//        if (outputPath.substr(0, 1) == "/") {
-//            //we are using MVAWorkshop on linux under wine;
-//            outputPath = 'Z:' + outputPath;
-//        }
-//        try {
-//            var windowsPartitionPathIndex:Number = Math.max(outputPath.indexOf(':\\'), outputPath.indexOf(':/'));
-//            if (windowsPartitionPathIndex == -1) {
-//                // we are using relative output path;
-//                var targetFile:File = (new File()).resolvePath(project.fileName);
-//                outputDirectory = targetFile.parent.resolvePath(outputPath);
-//            } else {
-//                outputDirectory = new File(outputPath);
-//            }
-//        } catch (e:Error) {
-//        }
-//        if (!outputDirectory || !outputDirectory.exists || !outputDirectory.isDirectory) {
-//            exportError('Wrong output project directory!');
-//            return;
-//        }
-//        var fs:FileStream = new FileStream();
-//        var tcaData:ByteArray = project.getExportedTCA();
-//        fs.open(outputDirectory.resolvePath(project.name + '.tca'), FileMode.WRITE);
-//        fs.writeBytes(tcaData);
-//        fs.close();
-//        PopupFactory.instance.showPopup(AppPopups.INFO_POPUP, 'Export success!');
+        var outputDirectory:File;
+        var outputPath:String = QGHProjectVO(project).outputQghPath;
+        if (outputPath.substr(0, 1) == "/") {
+            //we are using MVAWorkshop on linux under wine;
+            outputPath = 'Z:' + outputPath;
+        }
+        try {
+            var windowsPartitionPathIndex:Number = Math.max(outputPath.indexOf(':\\'), outputPath.indexOf(':/'));
+            if (windowsPartitionPathIndex == -1) {
+                // we are using relative output path;
+                var targetFile:File = (new File()).resolvePath(project.fileName);
+                outputDirectory = targetFile.parent.resolvePath(outputPath);
+            } else {
+                outputDirectory = new File(outputPath);
+            }
+        } catch (e:Error) {
+        }
+        if (!outputDirectory || !outputDirectory.exists || !outputDirectory.isDirectory) {
+            exportError('Wrong output project directory!');
+            return;
+        }
+        var fs:FileStream = new FileStream();
+        var qghData:ByteArray = project.getExportedQgh();
+        fs.open(outputDirectory.resolvePath(project.name + '.tca'), FileMode.WRITE);
+        fs.writeBytes(qghData);
+        fs.close();
+        PopupFactory.instance.showPopup(AppPopups.INFO_POPUP, 'Export success!');
     }
 
-//    private function exportError(msg:String):void {
-//        PopupFactory.instance.showPopup(AppPopups.ERROR_POPUP, msg, true, null, onOkClick);
-//        function onOkClick(event:Event):void {
-//            MainController.openProjectSettings();
-//        }
-//    }
+    private function exportError(msg:String):void {
+        PopupFactory.instance.showPopup(AppPopups.ERROR_POPUP, msg, true, null, onOkClick);
+        function onOkClick(event:Event):void {
+            MainController.openProjectSettings();
+        }
+    }
 
     public function addModel(texture:ModelVO):void {
         var newName:String = getNewNameForDuplicate(texture.name);

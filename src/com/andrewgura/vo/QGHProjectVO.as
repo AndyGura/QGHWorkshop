@@ -1,6 +1,9 @@
 package com.andrewgura.vo {
 
 import com.andrewgura.controllers.QGHController;
+import com.andrewgura.nfs12NativeFileFormats.models.ModelDescriptionVO;
+import com.andrewgura.nfs12NativeFileFormats.models.SubModelDescriptionVO;
+import com.andrewgura.utils.ModelLoader;
 
 import flash.utils.ByteArray;
 
@@ -42,17 +45,37 @@ public class QGHProjectVO extends ProjectVO {
 
     override public function serialize():ByteArray {
         var output:ByteArray = super.serialize();
+        for each (var model:ModelVO in contentCollection) {
+            output.writeObject(model.serialize());
+        }
         output.compress();
         return output;
     }
 
     override public function deserialize(name:String, fileName:String, data:ByteArray):void {
         super.deserialize(name, fileName, data);
-
+        data.uncompress();
+        data.position = 0;
+        while (data.bytesAvailable > 0) {
+            var o:* = data.readObject();
+            var model:ModelVO = new ModelVO(o.name);
+            model.modelDescription = new ModelDescriptionVO(o.name);
+            model.deserialize(o);
+            contentCollection.addItem(model);
+        }
     }
 
     override public function importFiles(files:Array):void {
         (new QGHController(this)).importFiles(files);
+    }
+
+    public function getExportedQgh():ByteArray {
+        var output:ByteArray = new ByteArray();
+        for each (var model:ModelVO in contentCollection) {
+            output.writeObject(model.serialize());
+        }
+        output.compress();
+        return output;
     }
 
     private function onTexturesChange(event:CollectionEvent):void {
